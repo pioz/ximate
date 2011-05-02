@@ -1,0 +1,38 @@
+= Ximate
+
+ApproXIMATE fuzzy search for Ruby on Rails activerecord models.
+
+== Requirements
+
+* Rails >= 3.0.0
+
+
+== Installation
+
+    gem install ximate
+
+== Usage
+
+In your model puts some like this:
+
+    class Post < ActiveRecord::Base
+      define_index(:en) do
+        add_text title
+        add_text keywords.join(' ')
+        add_text body(:en)
+      end
+    end
+
+Then you can perform a search
+
+    Post.asearch('Economy').where(:public => true).limit(5)
+
+== Questions or problems?
+
+If you have any issues with rplot please add an {issue on
+GitHub}[https://github.com/pioz/ximate/issues] or fork the project and
+send a pull request.
+
+== Copyright
+
+Copyright (c) 2010 Enrico Pilotto. MIT license.
