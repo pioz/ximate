@@ -1,7 +1,7 @@
 module Ximate
 
   DATA = {}
-  OPTIONS = {:order_by_rank => true}
+  OPTIONS = {:order_by_rank => true, :error_percent => 20}
 
   def self.included(base)
     base.extend(Search)
@@ -35,12 +35,10 @@ module Ximate
       DATA[I18n.locale] ||= {}
       DATA[I18n.locale][table] ||= {}
       DATA[I18n.locale][table].each do |word, ids|
-        if Fuzzy.equal(word, pattern.downcase, 20)
-          puts word
+        if Fuzzy.equal(word, pattern.downcase, OPTIONS[:error_percent])
           ids.each {|id, rank| matches[id] = matches[id].to_i + rank}
         end
       end
-      puts matches.inspect
       return where('1 = 0') if matches.empty?
       rel = scoped
       rel.ranks = matches if OPTIONS[:order_by_rank]
