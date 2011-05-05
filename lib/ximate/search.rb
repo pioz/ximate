@@ -1,7 +1,7 @@
 module Ximate
 
   DATA = {}
-  OPTIONS = {:order_by_rank => true, :error_percent => 20}
+  OPTIONS = {:order_by_rank => true, :error_percent => 20, :logger => true}
 
   def self.included(base)
     base.extend(Search)
@@ -19,10 +19,11 @@ module Ximate
 
       after_save :update_index
 
+      now = Time.now
       self.to_s.classify.constantize.all.each do |p|
         p.update_index(locale, &block)
       end
-
+      Rails.logger.info("Build XIMATE hash data for '#{table}' in #{Time.now - now}.") if OPTIONS[:logger]
     end
   end
 
