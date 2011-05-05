@@ -82,7 +82,7 @@ fuzzy_equal (VALUE self, VALUE text, VALUE pattern, VALUE errors_percent)
   int distance = levenshtein_distance (t, p);
   // printf ("Allowed errors: %d - Levenshtein's distance: %d\n", errors, distance);
   if (distance <= errors)
-    return Qtrue;
+    return INT2NUM (errors - distance);
   return Qfalse;
 }
 

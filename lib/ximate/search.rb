@@ -1,7 +1,11 @@
 module Ximate
 
   DATA = {}
-  OPTIONS = {:order_by_rank => true, :error_percent => 20, :logger => true}
+  OPTIONS = {:order_by_rank => true,
+             :match_error_percent => 20,
+             :ignore_word_short_than => 2,
+             :logger => true,
+             :debug => false}
 
   def self.included(base)
     base.extend(Search)
@@ -23,7 +27,7 @@ module Ximate
       self.to_s.classify.constantize.all.each do |p|
         p.update_index(locale, &block)
       end
-      Rails.logger.info("Build XIMATE hash data for '#{table}' in #{Time.now - now}.") if OPTIONS[:logger]
+      puts "\b\b=> Build XIMATE hash data for '#{table}' in #{Time.now - now}." if OPTIONS[:logger]
     end
   end
 
@@ -32,12 +36,22 @@ module Ximate
 
     def asearch(pattern)
       table = self.to_s.underscore.pluralize.to_sym
-      matches = {}
+      matches = {} # {id => rank, id => rank}
+      lastsearch = {} # Save last 'e' search for every word in pattern to avoid multi-search of the same word
+      pattern.split(' ').each { |w| lastsearch[w] = -1 }
       DATA[I18n.locale] ||= {}
       DATA[I18n.locale][table] ||= {}
-      DATA[I18n.locale][table].each do |word, ids|
-        if Fuzzy.equal(word, pattern.downcase, OPTIONS[:error_percent])
-          ids.each {|id, rank| matches[id] = matches[id].to_i + rank}
+      DATA[I18n.locale][table].each do |word, ids_ranks|
+        pattern.split(' ').each do |w|
+          if w.size > OPTIONS[:ignore_word_short_than]
+            if e = Fuzzy.equal(word, w.downcase, OPTIONS[:match_error_percent])
+              if e > lastsearch[w]
+                lastsearch[w] = e
+                Rails.logger.debug("XIMATE asearch: '#{word}' match with '#{w}' (e = #{e})") if OPTIONS[:debug]
+                ids_ranks.each { |id, rank| matches[id] = matches[id].to_i + (e**rank) }
+              end
+            end
+          end
         end
       end
       return where('1 = 0') if matches.empty?
@@ -45,33 +59,36 @@ module Ximate
       rel.ranks = matches if OPTIONS[:order_by_rank]
       rel.where("#{table}.id IN (#{matches.keys.join(',')})")
     end
+
   end
 
 
   module InstanceMethods
 
-    def add_text(text)
-      @words ||= []
-      @words += text.to_s.gsub(/<[^>]*>/i, ' ').gsub(/[\.,'":;!\?\(\)]/, ' ').split(' ').map{|word| word.downcase}
+    def add_text(text, priority = 1)
+      @words ||= {}
+      @words[priority] ||= []
+      @words[priority] += text.to_s.gsub(/<[^>]*>/i, ' ').gsub(/[\.,'":;!\?\(\)]/, ' ').split(' ').map{|word| word.downcase}.uniq
     end
 
     def update_index(locale = I18n.default_locale, &block)
       table = self.class.to_s.underscore.pluralize.to_sym
       remove_index(locale)
       instance_eval(&block)
-      @words.each do |word|
-        ids = (DATA[locale.to_sym][table][word] ||= {})
-        ids[self.id] ||= 0
-        ids[self.id] += 1
+      @words.each do |priority, words|
+        words.each do |word|
+          ids_ranks = (DATA[locale.to_sym][table][word] ||= {})
+          ids_ranks[self.id] = ids_ranks[self.id].to_i + priority
+        end
       end
     end
 
     def remove_index(locale)
       table = self.class.to_s.underscore.pluralize.to_sym
-      @words = []
-      DATA[locale.to_sym][table].each do |word, ids|
-        ids.delete(self.id)
-        DATA[locale.to_sym][table].delete(word) if ids.empty?
+      @words = {}
+      DATA[locale.to_sym][table].each do |word, ids_ranks|
+        ids_ranks.delete(self.id)
+        DATA[locale.to_sym][table].delete(word) if ids_ranks.empty?
       end
     end
 
