@@ -27,7 +27,7 @@ module Ximate
       self.to_s.classify.constantize.all.each do |p|
         p.update_index(locale, &block)
       end
-      puts "\b\b=> Build XIMATE hash data for '#{table}' in #{Time.now - now}." if OPTIONS[:logger]
+      puts "\b\b=> Build XIMATE hash data for '#{table}' in #{Time.now - now}s." if OPTIONS[:logger]
     end
   end
 
@@ -57,7 +57,20 @@ module Ximate
       return where('1 = 0') if matches.empty?
       rel = scoped
       rel.ranks = matches if OPTIONS[:order_by_rank]
-      rel.where("#{table}.id IN (#{matches.keys.join(',')})")
+      rel.select("*, #{gen_if_select(matches)} AS RANK").where("#{table}.id IN (#{matches.keys.join(',')})").order('rank DESC')
+    end
+
+    private
+
+    def gen_if_select(matches)
+      tmp = 'IF(id=myid,myrank,if)'
+      str = 'IF(id=myid,myrank,if)'
+      matches.each do |id, rank|
+        str.gsub!('myid', id.to_s)
+        str.gsub!('myrank', rank.to_s)
+        str.gsub!('if', tmp)
+      end
+      return str.gsub(tmp, '0')
     end
 
   end
