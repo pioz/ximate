@@ -1,9 +1,9 @@
 module Ximate
 
   DATA = {}
-  OPTIONS = {:order_by_rank => true,
-             :match_error_percent => 20,
+  OPTIONS = {:match_error_percent => 20,
              :ignore_word_short_than => 2,
+             #:order_by_rank => true,
              :logger => true,
              :debug => false}
 
@@ -55,9 +55,10 @@ module Ximate
         end
       end
       return where('1 = 0') if matches.empty?
-      rel = scoped
-      rel.ranks = matches if OPTIONS[:order_by_rank]
-      rel.select("*, #{gen_if_select(matches)} AS RANK").where("#{table}.id IN (#{matches.keys.join(',')})").order('rank DESC')
+      #rel = scoped
+      #rel.ranks = matches if OPTIONS[:order_by_rank]
+      #rel.where("#{table}.id IN (#{matches.keys.join(',')})")
+      select("*, #{gen_if_select(matches)} AS RANK").where("#{table}.id IN (#{matches.keys.join(',')})")
     end
 
     private
