@@ -21,7 +21,7 @@ module Ximate
       extend  ClassMethods
       include InstanceMethods
 
-      after_save :update_index
+      after_save { |proc| proc.update_index(I18n.locale, &block) }
 
       now = Time.now
       self.to_s.classify.constantize.all.each do |p|
