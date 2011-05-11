@@ -54,7 +54,7 @@ module Ximate
           end
         end
       end
-      return where('1 = 0') if matches.empty?
+      return select('*, 0 AS RANK').where('1 = 0') if matches.empty?
       #rel = scoped
       #rel.ranks = matches if OPTIONS[:order_by_rank]
       #rel.where("#{table}.id IN (#{matches.keys.join(',')})")
