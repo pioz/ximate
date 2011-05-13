@@ -3,7 +3,6 @@ module Ximate
   DATA = {}
   OPTIONS = {:match_error_percent => 20,
              :ignore_word_short_than => 2,
-             #:order_by_rank => true,
              :logger => true,
              :debug => false}
 
@@ -54,25 +53,26 @@ module Ximate
           end
         end
       end
-      return select('*, 0 AS RANK').where('1 = 0') if matches.empty?
-      #rel = scoped
-      #rel.ranks = matches if OPTIONS[:order_by_rank]
-      #rel.where("#{table}.id IN (#{matches.keys.join(',')})")
-      select("*, #{gen_if_select(matches)} AS RANK").where("#{table}.id IN (#{matches.keys.join(',')})")
+      #return select('*, 0 AS RANK').where('1 = 0') if matches.empty?
+      return where('1 = 0') if matches.empty?
+      rel = scoped
+      rel.ranks = matches
+      rel.where("#{table}.id IN (#{matches.keys.join(',')})")
+      # select("*, #{gen_if_select(matches)} AS RANK").where("#{table}.id IN (#{matches.keys.join(',')})")
     end
 
-    private
-
-    def gen_if_select(matches)
-      tmp = 'IF(id=myid,myrank,if)'
-      str = 'IF(id=myid,myrank,if)'
-      matches.each do |id, rank|
-        str.gsub!('myid', id.to_s)
-        str.gsub!('myrank', rank.to_s)
-        str.gsub!('if', tmp)
-      end
-      return str.gsub(tmp, '0')
-    end
+    # private
+    #
+    # def gen_if_select(matches)
+    #   tmp = 'IF(id=myid,myrank,if)'
+    #   str = 'IF(id=myid,myrank,if)'
+    #   matches.each do |id, rank|
+    #     str.gsub!('myid', id.to_s)
+    #     str.gsub!('myrank', rank.to_s)
+    #     str.gsub!('if', tmp)
+    #   end
+    #   return str.gsub(tmp, '0')
+    # end
 
   end
 

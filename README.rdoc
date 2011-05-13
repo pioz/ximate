@@ -4,7 +4,7 @@ ApproXIMATE fuzzy search for Ruby on Rails activerecord models.
 
 == Requirements
 
-* Rails >= 3.0.0
+* Rails >= 3.0.1
 
 
 == Installation
@@ -17,15 +17,22 @@ In your model puts some like this:
 
     class Post < ActiveRecord::Base
       define_index(:en) do
-        add_text title
-        add_text keywords.join(' ')
+        add_text title, 3
+        add_text keywords.join(' '), 2
         add_text body(:en)
       end
     end
 
+In this case we can perform an appoximate search on title, keywords and body fields of posts
+where title is most important than keywords than body (title have priority 3, keywords 2 and body 1).
+
 Then you can perform a search
 
-    Post.asearch('Economy').where(:public => true).limit(5)
+    Post.asearch('Hello world').where(:public => true).limit(5)
+
+You can also order the results by rank (calculate by ximate)
+
+    Post.asearch('Hello world').order('rank DESC').where(:public => true).limit(5)
 
 == Questions or problems?
 
