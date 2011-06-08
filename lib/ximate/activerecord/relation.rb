@@ -13,12 +13,16 @@ module ActiveRecord
     end
 
     def order(*args)
-      if !@ranks.empty? && args[0] =~ /^rank/i
-        tokens = args[0].split(' ')
-        verse = tokens[1] if tokens[1] =~ /^(asc|desc)$/i
-        verse ||= 'ASC'
-        id_ordered = @ranks.keys.sort{|x,y| @ranks[x] <=> @ranks[y]}
-        orig_order("FIELD(id,#{id_ordered.join(',')}) #{verse}")
+      if args[0] =~ /^rank/i
+        unless @ranks.empty?
+          tokens = args[0].split(' ')
+          verse = tokens[1] if tokens[1] =~ /^(asc|desc)$/i
+          verse ||= 'ASC'
+          id_ordered = @ranks.keys.sort{|x,y| @ranks[x] <=> @ranks[y]}
+          orig_order("FIELD(id,#{id_ordered.join(',')}) #{verse}")
+        else
+          scoped
+        end
       else
         orig_order(args)
       end
