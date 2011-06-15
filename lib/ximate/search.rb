@@ -13,20 +13,22 @@ module Ximate
 
   module Search
     def define_index(locale = I18n.default_locale, &block)
-      table = self.to_s.underscore.pluralize.to_sym
-      DATA[locale.to_sym] ||= {}
-      DATA[locale.to_sym][table] ||= {}
+      if ActiveRecord::Base.connection.tables.include?(self.to_s.underscore.pluralize)
+        table = self.to_s.underscore.pluralize.to_sym
+        DATA[locale.to_sym] ||= {}
+        DATA[locale.to_sym][table] ||= {}
 
-      extend  ClassMethods
-      include InstanceMethods
+        extend  ClassMethods
+        include InstanceMethods
 
-      after_save { |proc| proc.update_index(I18n.locale, &block) }
+        after_save { |proc| proc.update_index(I18n.locale, &block) }
 
-      now = Time.now
-      self.to_s.classify.constantize.all.each do |p|
-        p.update_index(locale, &block)
+        now = Time.now
+        self.to_s.classify.constantize.all.each do |p|
+          p.update_index(locale, &block)
+        end
+        puts "\b\b=> Build XIMATE hash data for '#{table}' in #{Time.now - now}s." if OPTIONS[:logger]
       end
-      puts "\b\b=> Build XIMATE hash data for '#{table}' in #{Time.now - now}s." if OPTIONS[:logger]
     end
   end
 
