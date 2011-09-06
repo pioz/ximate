@@ -88,13 +88,15 @@ module Ximate
     end
 
     def update_index(locale = I18n.default_locale, &block)
-      table = self.class.to_s.underscore.pluralize.to_sym
-      remove_index(locale)
-      instance_eval(&block)
-      @words.each do |priority, words|
-        words.each do |word|
-          ids_ranks = (DATA[locale.to_sym][table][word] ||= {})
-          ids_ranks[self.id] = ids_ranks[self.id].to_i + priority
+      if DATA[locale]
+        table = self.class.to_s.underscore.pluralize.to_sym
+        remove_index(locale)
+        instance_eval(&block)
+        @words.each do |priority, words|
+          words.each do |word|
+            ids_ranks = (DATA[locale.to_sym][table][word] ||= {})
+            ids_ranks[self.id] = ids_ranks[self.id].to_i + priority
+          end
         end
       end
     end
