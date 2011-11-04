@@ -64,8 +64,8 @@ You can order the results by rank (calculate by Ximate)
 
     Post.asearch('Hello world').order('rank DESC').where(:public => true)
 
-Unfortunately to do this, Ximate use the FIELD function supported only by MySQL.
-So the ordering by rank works only with MySQL.
+Unfortunately to do this, Ximate use the +FIELD+ function supported only by MySQL.
+So *the ordering by rank works only with MySQL*.
 
 == Questions or problems?
 
