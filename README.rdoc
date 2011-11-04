@@ -2,12 +2,12 @@
 
 ApproXIMATE fuzzy search for Ruby on Rails activerecord models.
 
-== Requirements
+=== Requirements
 
 * Rails >= 3.0.1
 
 
-== Installation
+=== Installation
 
     gem install ximate
 
@@ -41,7 +41,7 @@ Then you can perform a search
 
     Post.asearch('Hello world').where(:public => true).limit(5)
 
-`asearch` method is chainable with the usual activerecord methods.
++asearch+ method is chainable with the usual activerecord methods.
 You can also order the results by rank (calculate by ximate)
 
     Post.asearch('Hello world').order('rank DESC').where(:public => true)
@@ -51,7 +51,7 @@ The cool stuff is that if you search with
     Post.asearch('Hello worlds').order('rank DESC').where(:public => true)
 
 the results will be the same!
-The error allowed by Ximate can be expressed as a percentage by setting the option `Ximate::OPTIONS[:match_error_percent]`.
+The error allowed by Ximate can be expressed as a percentage by setting the option <tt>Ximate::OPTIONS[:match_error_percent]</tt>.
 Default value is 20%.
 
 Finally you can set some Ximate options in your initializers.
