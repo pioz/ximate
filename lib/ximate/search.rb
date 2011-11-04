@@ -13,8 +13,8 @@ module Ximate
 
   module Search
     def define_index(locale = I18n.default_locale, &block)
-      if ActiveRecord::Base.connection.tables.include?(self.to_s.tableize)
-        table = self.to_s.tableize.to_sym
+      if ActiveRecord::Base.connection.tables.include?(self.table_name)
+        table = self.table_name.to_sym
         DATA[locale.to_sym] ||= {}
         DATA[locale.to_sym][table] ||= {}
 
@@ -36,7 +36,7 @@ module Ximate
   module ClassMethods
 
     def asearch(pattern)
-      table = self.to_s.tableize.to_sym
+      table = self.table_name.to_sym
       matches = {} # {id => rank, id => rank}
       lastsearch = {} # Save last 'e' search for every word in pattern to avoid multi-search of the same word
       pattern.split(' ').each { |w| lastsearch[w] = -1 }
@@ -88,7 +88,7 @@ module Ximate
 
     def update_index(locale = I18n.default_locale, &block)
       if DATA[locale]
-        table = self.class.to_s.tableize.to_sym
+        table = self.class.table_name.to_sym
         remove_index(locale)
         instance_eval(&block)
         @words.each do |priority, words|
@@ -101,7 +101,7 @@ module Ximate
     end
 
     def remove_index(locale)
-      table = self.class.to_s.tableize.to_sym
+      table = self.class.table_name.to_sym
       @words = {}
       DATA[locale.to_sym][table].each do |word, ids_ranks|
         ids_ranks.delete(self.id)
