@@ -42,13 +42,10 @@ Then you can perform a search
     Post.asearch('Hello world').where(:public => true).limit(5)
 
 +asearch+ method is chainable with the usual activerecord methods.
-You can also order the results by rank (calculate by ximate)
-
-    Post.asearch('Hello world').order('rank DESC').where(:public => true)
 
 The cool stuff is that if you search with
 
-    Post.asearch('Hello worlds').order('rank DESC').where(:public => true)
+    Post.asearch('Hello worlds').where(:public => true)
 
 the results will be the same!
 The error allowed by Ximate can be expressed as a percentage by setting the option <tt>Ximate::OPTIONS[:match_error_percent]</tt>.
@@ -60,6 +57,15 @@ Finally you can set some Ximate options in your initializers.
     Ximate::OPTIONS[:ignore_word_short_than] = 2
     Ximate::OPTIONS[:logger] = true
     Ximate::OPTIONS[:debug] = false
+
+=== Ordering
+
+You can order the results by rank (calculate by Ximate)
+
+    Post.asearch('Hello world').order('rank DESC').where(:public => true)
+
+Unfortunately to do this, Ximate use the FIELD function supported only by MySQL.
+So the ordering by rank works only with MySQL.
 
 == Questions or problems?
 
