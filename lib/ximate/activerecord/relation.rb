@@ -5,7 +5,6 @@ module ActiveRecord
 
     alias_method :orig_initialize, :initialize
     alias_method :orig_order, :order
-    # alias_method :orig_to_a, :to_a
 
     def initialize(klass, table)
       @ranks = {}
@@ -28,12 +27,6 @@ module ActiveRecord
       end
     end
 
-    # def to_a
-    #   return orig_to_a if @ranks.empty?
-    #   orig_to_a.sort do |x, y|
-    #     @ranks[y.id] <=> @ranks[x.id]
-    #   end
-    # end
   end
 
 end

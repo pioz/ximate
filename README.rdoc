@@ -16,7 +16,7 @@ ApproXIMATE fuzzy search for Ruby on Rails activerecord models.
 In your model puts some like this:
 
     class Post < ActiveRecord::Base
-      define_index(:en) do
+      define_index do
         add_text title, 3
         add_text keywords.join(' '), 2
         add_text body(:en)
@@ -26,17 +26,44 @@ In your model puts some like this:
 In this case we can perform an appoximate search on title, keywords and body fields of posts
 where title is most important than keywords than body (title have priority 3, keywords 2 and body 1).
 
+You can also define indexes for different locales like this:
+
+    class Post < ActiveRecord::Base
+      [:en, :it, :de].each do |locale|
+        define_index(locale) do
+          add_text title(locale)
+          add_text body(locale)
+        end
+      end
+    end
+
 Then you can perform a search
 
     Post.asearch('Hello world').where(:public => true).limit(5)
 
+`asearch` method is chainable with the usual activerecord methods.
 You can also order the results by rank (calculate by ximate)
 
-    Post.asearch('Hello world').order('rank DESC').where(:public => true).limit(5)
+    Post.asearch('Hello world').order('rank DESC').where(:public => true)
+
+The cool stuff is that if you search with
+
+    Post.asearch('Hello worlds').order('rank DESC').where(:public => true)
+
+the results will be the same!
+The error allowed by Ximate can be expressed as a percentage by setting the option `Ximate::OPTIONS[:match_error_percent]`.
+Default value is 20%.
+
+Finally you can set some Ximate options in your initializers.
+
+    Ximate::OPTIONS[:match_error_percent] = 20
+    Ximate::OPTIONS[:ignore_word_short_than] = 2
+    Ximate::OPTIONS[:logger] = true
+    Ximate::OPTIONS[:debug] = false
 
 == Questions or problems?
 
-If you have any issues with rplot please add an {issue on
+If you have any issues please add an {issue on
 GitHub}[https://github.com/pioz/ximate/issues] or fork the project and
 send a pull request.
 
