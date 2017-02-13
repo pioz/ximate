@@ -55,6 +55,7 @@ Finally you can set some Ximate options in your initializers.
 
     Ximate::OPTIONS[:match_error_percent] = 20
     Ximate::OPTIONS[:ignore_word_short_than] = 2
+    Ximate::OPTIONS[:async] = false
     Ximate::OPTIONS[:logger] = true
     Ximate::OPTIONS[:debug] = false
 

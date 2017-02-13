@@ -3,15 +3,10 @@ module ActiveRecord
   class Relation
     attr_accessor :ranks
 
-    alias_method :orig_initialize, :initialize
     alias_method :orig_order, :order
 
-    def initialize(klass, table)
-      @ranks = {}
-      orig_initialize(klass, table)
-    end
-
     def order(*args)
+      @ranks ||= {}
       if args[0] =~ /^rank/i
         unless @ranks.empty?
           tokens = args[0].split(' ')
