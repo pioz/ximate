@@ -63,8 +63,9 @@ module Ximate
         end
       end
       return where('1=0') if matches.empty?
-      rel.where("#{table}.id IN (#{matches.keys.join(',')})")
+      rel = where("#{table}.id IN (#{matches.keys.join(',')})")
       rel.ranks = matches
+      return rel
       # select("*, #{gen_if_select(matches)} AS RANK").where("#{table}.id IN (#{matches.keys.join(',')})")
     end
 
