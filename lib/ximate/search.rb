@@ -24,8 +24,10 @@ module Ximate
         after_save { |proc| proc.update_index(I18n.locale, &block) }
 
         now = Time.now
-        self.to_s.classify.constantize.all.each do |p|
-          p.update_index(locale, &block)
+        self.to_s.classify.constantize.find_in_batches(batch_size: 100) do |group|
+          group.each do |p|
+            p.update_index(locale, &block)
+          end
         end
         puts "\b\b=> Build XIMATE hash data for '#{table}' in #{Time.now - now}s." if OPTIONS[:logger]
       end
@@ -55,7 +57,7 @@ module Ximate
           end
         end
       end
-      return where('1 = 0') if matches.empty?
+      return none if matches.empty?
       rel = scoped
       rel.ranks = matches
       rel.where("#{table}.id IN (#{matches.keys.join(',')})")
